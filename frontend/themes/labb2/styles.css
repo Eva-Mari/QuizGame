@@ -1,0 +1,14 @@
+@import url('./main-layout.css');
+
+.test-style {
+    color: blue;
+    font-weight: bold;
+    background-color: bisque;
+    /* Other styles here */
+}
+
+.score-div{
+
+    color: black;
+    font-weight: bold;
+}
