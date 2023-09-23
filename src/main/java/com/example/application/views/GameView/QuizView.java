@@ -25,8 +25,9 @@ import java.util.Collections;
 import java.util.List;
 
 @PageTitle("Quiz Game")
-@Route(value = "hello", layout = MainLayout.class)
-@RouteAlias(value = "", layout = MainLayout.class)
+//@Route(value = "hello", layout = MainLayout.class)
+@Route(value="", layout = MainLayout.class)
+//@RouteAlias(value = "", layout = MainLayout.class)
 public class QuizView extends VerticalLayout {
 
     private final QuizService quizService;

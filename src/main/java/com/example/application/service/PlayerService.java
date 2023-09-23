@@ -3,10 +3,12 @@ package com.example.application.service;
 import com.example.application.entity.Player;
 import com.example.application.repository.PlayerRepository;
 import jakarta.validation.Valid;
+import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
+@Service
 public class PlayerService {
 
     private PlayerRepository playerRepository;
@@ -16,6 +18,14 @@ public class PlayerService {
     }
 
     public List<Player> getPlayers(){
+
+        if(playerRepository.count() == 0){
+            Player player = new Player(1L, "Elsy", 10);
+            Player player1 = new Player(2L, "Pippi", 5);
+            playerRepository.save(player);
+            playerRepository.save(player1);
+        }
+
         return this.playerRepository.findAll();
     }
 
