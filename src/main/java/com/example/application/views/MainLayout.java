@@ -57,7 +57,6 @@ public class MainLayout extends AppLayout {
 
         addToNavbar(header);
 
-
     }
 
     private void createDrawer() {
@@ -66,67 +65,4 @@ public class MainLayout extends AppLayout {
                 new RouterLink("PlayerView", PlayerView.class)
         ));
     }
-
-    /**
-     * A simple navigation item component, based on ListItem element.
-     */
-//    public static class MenuItemInfo extends ListItem {
-//
-//        private final Class<? extends Component> view;
-//
-//        public MenuItemInfo(String menuTitle, Component icon, Class<? extends Component> view) {
-//            this.view = view;
-//            RouterLink link = new RouterLink();
-//            // Use Lumo classnames for various styling
-//            link.addClassNames(Display.FLEX, Gap.XSMALL, Height.XSMALL, AlignItems.CENTER, Padding.Horizontal.SMALL,
-//                    TextColor.BODY);
-//            link.setRoute(view);
-//
-//            Span text = new Span(menuTitle);
-//            // Use Lumo classnames for various styling
-//            text.addClassNames(FontWeight.MEDIUM, FontSize.MEDIUM, Whitespace.NOWRAP);
-//
-//            if (icon != null) {
-//                link.add(icon);
-//            }
-//            link.add(text);
-//            add(link);
-//        }
-//
-//        public Class<?> getView() {
-//            return view;
-//        }
-//    }
-//
-//    public MainLayout() {
-//        addToNavbar(createHeaderContent());
-//
-//    }
-//
-//    private Component createHeaderContent() {
-//        Header header = new Header();
-//        header.addClassNames(BoxSizing.BORDER, Display.FLEX, FlexDirection.COLUMN, Width.FULL);
-//
-//        Nav nav = new Nav();
-//        nav.addClassNames(Display.FLEX, Overflow.AUTO, Padding.Horizontal.MEDIUM, Padding.Vertical.XSMALL);
-//
-//        // Wrap the links in a list; improves accessibility
-//        UnorderedList list = new UnorderedList();
-//        list.addClassNames(Display.FLEX, Gap.SMALL, ListStyleType.NONE, Margin.LARGE, Padding.NONE);
-//        nav.add(list);
-//
-//        for (MenuItemInfo menuItem : createMenuItems()) {
-//            list.add(menuItem);
-//        }
-//
-//        header.add(nav);
-//        return header;
-//    }
-//
-//    private MenuItemInfo[] createMenuItems() {
-//        return new MenuItemInfo[]{ //
-//                new MenuItemInfo("Quiz View", LineAwesomeIcon.GLOBE_SOLID.create(), QuizView.class), //
-//        };
-//    }
-
 }

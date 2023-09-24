@@ -30,4 +30,8 @@ public class Player {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public String getScoreAsString(){
+        return ""+getScore();
+    }
 }

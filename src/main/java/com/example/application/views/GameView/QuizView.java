@@ -7,6 +7,7 @@ import com.example.application.service.UserScoreChangeEvent;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -48,12 +49,14 @@ public class QuizView extends VerticalLayout {
 
 
 
+
     @Autowired
     public QuizView(QuizService quizService, ApplicationEventPublisher eventPublisher) {
         this.quizService = quizService;
         this.gameLogic = new GameLogic(eventPublisher);
         this.questionDiv = new Div();
         this.answerButtons = new Button[4];
+
         this.dropDownMenu = new DropDownMenu(quizService.getUrLhandler());
         this.startGame = new Button("Start Game");
         restartGameButton = new Button("Restart Game");
@@ -254,6 +257,7 @@ public class QuizView extends VerticalLayout {
         Collections.shuffle(answerOptions);
 
         // add the answer alternatives to the button texts
+
         for (int i = 0; i < NUM_ANSWER_OPTIONS; i++) {
             answerButtons[i].setText(answerOptions.get(i));
             answerButtons[i].setEnabled(true);
@@ -275,4 +279,5 @@ public class QuizView extends VerticalLayout {
 
         return layout;
     }
+
 }

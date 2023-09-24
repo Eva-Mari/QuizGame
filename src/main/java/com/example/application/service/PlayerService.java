@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 public class PlayerService {
 
-    private PlayerRepository playerRepository;
+    private final PlayerRepository playerRepository;
 
     public PlayerService(PlayerRepository repository){
         this.playerRepository = repository;
@@ -31,7 +31,12 @@ public class PlayerService {
 
     @Valid
     public void savePlayer(Player player){
-        playerRepository.save(player);
+        if(player != null) {
+            playerRepository.save(player);
+        }
+        else{
+            System.out.println(player+" is null!!");
+        }
     }
 
 }

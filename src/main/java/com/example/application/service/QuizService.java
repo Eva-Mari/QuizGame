@@ -44,28 +44,4 @@ public class QuizService {
             return null;
         }
     }
-
-    public QuizQuestion getQuizQuestion() {
-        try {
-            ResponseEntity<List<QuizQuestion>> response = restTemplate.exchange(
-                    urLhandler.getUpdatedUrl(),
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<>() {
-                    }
-            );
-
-            System.out.println("FROM GET QUIZ QUESTION "+response.getBody().get(0));
-            return response.getBody().get(0);
-
-        } catch (Exception e) {
-            // Handle exceptions, e.g., network errors, API errors
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static Boolean checkAnswer(String correctAnswer, String userAnswer) {
-        return correctAnswer.equals(userAnswer);
-    }
 }
