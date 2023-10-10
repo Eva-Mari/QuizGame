@@ -39,4 +39,12 @@ public class PlayerService {
         }
     }
 
+    public void updateUserScore(Player player, int score){
+
+        Player playerUpdate = playerRepository.findById(player.getId()).get();
+        playerUpdate.setScore(score);
+        playerRepository.save(playerUpdate);
+
+    }
+
 }

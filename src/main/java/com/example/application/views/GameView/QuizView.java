@@ -1,13 +1,15 @@
 package com.example.application.views.GameView;
 
+import com.example.application.entity.Player;
 import com.example.application.entity.QuizQuestion;
 import com.example.application.game.GameLogic;
+import com.example.application.service.PlayerService;
 import com.example.application.service.QuizService;
 import com.example.application.service.UserScoreChangeEvent;
-import com.example.application.views.MainLayout;
+import com.example.application.views.PlayerView.PlayerView;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,7 +18,8 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
+import com.vaadin.flow.server.VaadinSession;
+import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -26,41 +29,34 @@ import java.util.Collections;
 import java.util.List;
 
 @PageTitle("Quiz Game")
-//@Route(value = "hello", layout = MainLayout.class)
-@Route(value="", layout = MainLayout.class)
-//@RouteAlias(value = "", layout = MainLayout.class)
+@PermitAll
+@Route(value="quiz")
 public class QuizView extends VerticalLayout {
 
     private final QuizService quizService;
     private final GameLogic gameLogic;
+
+    private PlayerService playerService;
     private final Div questionDiv;
     private final Button[] answerButtons;
-    private final Button startGame;
-    private final DropDownMenu dropDownMenu;
     private final FlexLayout questionLayout = new FlexLayout();
     private final FlexLayout answerLayout = new FlexLayout();
     private final Button nextQuestionButton = new Button("Next Question");
-
     private final Button endGameButton = new Button("End Game");
-    private final Button restartGameButton;
     private static final int NUM_ANSWER_OPTIONS = 4;
     private final Button previousButton;
     private final Div scoreDiv;
-
-
-
+    private final FlexLayout playerLayout = new FlexLayout();
+    private Player selectedPlayer;
 
     @Autowired
-    public QuizView(QuizService quizService, ApplicationEventPublisher eventPublisher) {
+    public QuizView(QuizService quizService, ApplicationEventPublisher eventPublisher, PlayerService playerService) {
         this.quizService = quizService;
+        this.playerService = playerService;
         this.gameLogic = new GameLogic(eventPublisher);
         this.questionDiv = new Div();
         this.answerButtons = new Button[4];
 
-        this.dropDownMenu = new DropDownMenu(quizService.getUrLhandler());
-        this.startGame = new Button("Start Game");
-        restartGameButton = new Button("Restart Game");
-        startGame.addClassName("test-style"); // Add a custom CSS class to the Label
         this.previousButton = new Button("Previous question");
 
         HorizontalLayout buttonLayout = alignHorizontalLayout();
@@ -70,16 +66,14 @@ public class QuizView extends VerticalLayout {
 
         HorizontalLayout headerLayout = alignHorizontalLayout();
 
-        HorizontalLayout startGameLayout = alignHorizontalLayout();
-        startGameLayout.add(startGame);
 
+        selectedPlayer = (Player) VaadinSession.getCurrent().getAttribute("selectedPlayer");
 
         scoreDiv = new Div();
         scoreDiv.addClassName("score-div");
 
 
         headerLayout.add(scoreDiv);
-
 
         configureFlexLayout(questionLayout);
         configureFlexLayout(answerLayout);
@@ -97,24 +91,18 @@ public class QuizView extends VerticalLayout {
         previousButton.addClickListener(buttonClickEvent -> loadPreviousQuestion());
 
         endGameButton.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        endGameButton.addClickListener(buttonClickEvent -> restartGame());
+        endGameButton.addClickListener(buttonClickEvent -> {
+            playerService.updateUserScore(selectedPlayer, gameLogic.getUserScore());
+            UI.getCurrent().navigate(PlayerView.class);
+        });
 
         questionLayout.add(questionDiv);
         answerLayout.add(answerDiv);
 
-        // Initially, hide everything except the difficulty/category selection and "Start Game" button
-        restartGame();
+        startGame();
 
-        // Add click listener to start game button
-        startGame.addClickListener(buttonClickEvent -> {
-            startGame();
-        });
-
-        restartGameButton.addClickListener(buttonClickEvent -> {
-            restartGame();
-        });
-
-        add(dropDownMenu, startGameLayout, headerLayout, questionLayout, answerLayout, buttonLayout, restartGameButton);
+        add(headerLayout, questionLayout, answerLayout, buttonLayout,
+                playerLayout);
     }
 
 
@@ -125,24 +113,11 @@ public class QuizView extends VerticalLayout {
     }
 
     private void updateScoreDiv(int score) {
-        Span scoreSpan = new Span("Total score: " + score);
+        Span scoreSpan = new Span(selectedPlayer.getName()+": Total score: " + score);
         scoreDiv.removeAll();
         scoreDiv.add(scoreSpan);
     }
 
-    private void restartGame() {
-
-        // Hide and show appropriate components
-        dropDownMenu.setVisible(true);
-        questionLayout.setVisible(false);
-        answerLayout.setVisible(false);
-        scoreDiv.setVisible(false);
-        nextQuestionButton.setVisible(false);
-        previousButton.setVisible(false);
-        startGame.setVisible(true); // Show the "Start Game" button again
-        restartGameButton.setVisible(false); // Hide the restart button
-        endGameButton.setVisible(false);
-    }
     private void startGame(){
 
         gameLogic.updateQuizQuestions(quizService);
@@ -150,29 +125,8 @@ public class QuizView extends VerticalLayout {
         gameLogic.setFirstQuestionIndex();
         loadNextQuestion();
 
-        // Make everything visible except the "Start Game" button and difficulty/category selection
-        questionLayout.setVisible(true);
-        answerLayout.setVisible(true);
-        nextQuestionButton.setVisible(true);
-        previousButton.setVisible(true);
-        dropDownMenu.setVisible(false);
-        startGame.setVisible(false);
-        scoreDiv.setVisible(true);
-        endGameButton.setVisible(true);
     }
 
-    private void endGame(){
-
-        System.out.println("USER SCORE: "+ gameLogic.getUserScore());
-        updateScoreDiv(gameLogic.getUserScore());
-        //scoreDiv.setVisible(true);
-        answerLayout.setVisible(false);
-        questionDiv.setVisible(false);
-        endGameButton.setVisible(false);
-        nextQuestionButton.setVisible(false);
-        previousButton.setVisible(false);
-        restartGameButton.setVisible(true);
-    }
 
     private void loadNextQuestion() {
         // fetch data from the trivia API
@@ -180,26 +134,18 @@ public class QuizView extends VerticalLayout {
         QuizQuestion quizQuestion = gameLogic.getCurrentQuestion();
 
         if (!gameOver) {
+            int currentQuestion = gameLogic.getCurrentQuestionIndex() +1;
 
             // update the div with the question
             answerLayout.setVisible(true);
-            questionDiv.setText("Question "+ gameLogic.getCurrentQuestionIndex()+": "+ quizQuestion.question().text());
+            questionDiv.setText("Question "+ currentQuestion+": "+ quizQuestion.question().text());
             updateAnswerButtons(quizQuestion);
             checkAnswerStatus(quizQuestion);
             updateScoreDiv(gameLogic.getUserScore());
 
         }else {
-
             questionDiv.setText("No following questions");
             answerLayout.setVisible(false);
-//            questionDiv.setText("No more questions to load!");
-//            System.out.println("USER SCORE: "+ gameLogic.getUserScore());
-//            updateScoreDiv(gameLogic.getUserScore());
-//            //scoreDiv.setVisible(true);
-//            answerLayout.setVisible(false);
-//            nextQuestionButton.setVisible(false);
-//            previousButton.setVisible(false);
-//            restartGameButton.setVisible(true);
         }
     }
 
@@ -279,5 +225,6 @@ public class QuizView extends VerticalLayout {
 
         return layout;
     }
+
 
 }

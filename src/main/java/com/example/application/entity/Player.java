@@ -18,7 +18,7 @@ public class Player {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @NotNull
+    @NotNull(message = "The player must have a name!")
     private String name;
 
     private int score;

@@ -1,44 +1,37 @@
 package com.example.application.views;
-
-
-import com.example.application.views.GameView.QuizView;
 import com.example.application.views.PlayerView.PlayerView;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.BoxSizing;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FlexDirection;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import com.vaadin.flow.theme.lumo.LumoUtility.Height;
-import com.vaadin.flow.theme.lumo.LumoUtility.ListStyleType;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
-import com.vaadin.flow.theme.lumo.LumoUtility.Whitespace;
-import com.vaadin.flow.theme.lumo.LumoUtility.Width;
-import org.vaadin.lineawesome.LineAwesomeIcon;
-
-import javax.swing.text.html.ListView;
+import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * The main view is a top-level placeholder for other views.
+ *
+ * TODO: uppdatera poäng efter varje runda?
+ * TODO: om ny spelare skapas och sen start game, måste denna sparas till db
+ * TODO: oklart fel i listan vid navigering lägst till höger och längst till vänster
+ * TODO: env variabler och pusha till github
+ * TODO: redigera login view till ngt trevligare
  */
+@Route("")
+@PermitAll
 public class MainLayout extends AppLayout {
+    private final PlayerView playerView;
 
-    public MainLayout(){
+    @Autowired
+    public MainLayout(PlayerView playerView){
+        this.playerView = playerView;
         createHeader();
-        createDrawer();
+        // ... Other layout configuration ...
+        setContent(playerView);
+
     }
 
     private void createHeader(){
@@ -57,12 +50,5 @@ public class MainLayout extends AppLayout {
 
         addToNavbar(header);
 
-    }
-
-    private void createDrawer() {
-        addToDrawer(new VerticalLayout(
-                new RouterLink("QuizView", QuizView.class),
-                new RouterLink("PlayerView", PlayerView.class)
-        ));
     }
 }

@@ -1,10 +1,11 @@
 package com.example.application.views.PlayerView;
 
 import com.example.application.entity.Player;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Key;
+import com.example.application.service.PlayerService;
+import com.example.application.service.QuizService;
+import com.example.application.views.GameView.DropDownMenu;
+import com.example.application.views.GameView.QuizView;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -13,9 +14,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.BinderValidationStatus;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.shared.Registration;
 
-import java.util.List;
 
 public class PlayerForm extends FormLayout {
 
@@ -25,9 +26,21 @@ public class PlayerForm extends FormLayout {
     Button save = new Button("Save");
     Button close = new Button("Cancel");
 
+    //private final PlayerService playerService;
+
+    private Button startgameButton = new Button("Start Game");
+
     Binder<Player> binder = new BeanValidationBinder<>(Player.class);
 
-    public PlayerForm(List<Player> players) {
+    private Player selectedPlayer;
+
+   // private QuizService quizService;
+
+
+
+    public PlayerForm() {
+
+
 
         binder.bindInstanceFields(this);
 
@@ -48,8 +61,19 @@ public class PlayerForm extends FormLayout {
         close.addClickListener(event -> fireEvent(new CloseEvent(this)));
 
         binder.addStatusChangeListener(e -> save.setEnabled(binder.isValid()));
+
+        startgameButton.addClassName("test-style");
+
+        startgameButton.addClickListener(buttonClickEvent ->
+                navigateToQuizView());
         return new HorizontalLayout(save, close);
     }
+
+    private void navigateToQuizView() {
+        VaadinSession.getCurrent().setAttribute("selectedPlayer", selectedPlayer);
+        UI.getCurrent().navigate(QuizView.class);
+    }
+
 
     private void validateAndSave() {
 
@@ -65,9 +89,10 @@ public class PlayerForm extends FormLayout {
 
     public void setPlayer(Player player) {
         if(player != null) {
-            System.out.println("Set beand is " + player.getName());
+            System.out.println("Set bean is " + player.getName());
         }else{
             System.out.println("player is null");}
+        selectedPlayer = player;
         binder.setBean(player);
     }
 
@@ -80,8 +105,6 @@ public class PlayerForm extends FormLayout {
         }
 
         public Player getFormPlayer() {
-
-            System.out.println("returnning get form player: "+player.getName());
             return player;
         }
     }

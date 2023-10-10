@@ -1,15 +1,17 @@
 package com.example.application.game;
 
-import com.example.application.entity.Question;
+import com.example.application.entity.Player;
 import com.example.application.entity.QuizQuestion;
 import com.example.application.service.QuizService;
 import com.example.application.service.UserScoreChangeEvent;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 public class GameLogic {
 
     private List<QuizQuestion> quizQuestions;
@@ -20,12 +22,22 @@ public class GameLogic {
 
     private final ApplicationEventPublisher eventPublisher;
 
+    private Player player;
+
     public GameLogic(ApplicationEventPublisher eventPublisher) {
         this.quizQuestions = null;
         this.currentQuestionIndex = -1;
         this.userAnswers = new HashMap<>();
         this.userScore = 0;
         this.eventPublisher = eventPublisher;
+    }
+
+    public Player getPlayer(){
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 
     public int getUserScore(){
