@@ -10,6 +10,7 @@ import com.example.application.views.PlayerView.PlayerView;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -36,23 +37,20 @@ public class QuizView extends VerticalLayout {
     private final QuizService quizService;
     private final GameLogic gameLogic;
 
-    private PlayerService playerService;
     private final Div questionDiv;
     private final Button[] answerButtons;
-    private final FlexLayout questionLayout = new FlexLayout();
     private final FlexLayout answerLayout = new FlexLayout();
     private final Button nextQuestionButton = new Button("Next Question");
-    private final Button endGameButton = new Button("End Game");
     private static final int NUM_ANSWER_OPTIONS = 4;
     private final Button previousButton;
     private final Div scoreDiv;
-    private final FlexLayout playerLayout = new FlexLayout();
-    private Player selectedPlayer;
+    private final Player selectedPlayer;
+
+    Dialog resultDialog = new Dialog();
 
     @Autowired
     public QuizView(QuizService quizService, ApplicationEventPublisher eventPublisher, PlayerService playerService) {
         this.quizService = quizService;
-        this.playerService = playerService;
         this.gameLogic = new GameLogic(eventPublisher);
         this.questionDiv = new Div();
         this.answerButtons = new Button[4];
@@ -62,6 +60,7 @@ public class QuizView extends VerticalLayout {
         HorizontalLayout buttonLayout = alignHorizontalLayout();
         buttonLayout.add(previousButton);
         buttonLayout.add(nextQuestionButton);
+        Button endGameButton = new Button("End Game");
         buttonLayout.add(endGameButton);
 
         HorizontalLayout headerLayout = alignHorizontalLayout();
@@ -70,11 +69,10 @@ public class QuizView extends VerticalLayout {
         selectedPlayer = (Player) VaadinSession.getCurrent().getAttribute("selectedPlayer");
 
         scoreDiv = new Div();
-        scoreDiv.addClassName("score-div");
-
 
         headerLayout.add(scoreDiv);
 
+        FlexLayout questionLayout = new FlexLayout();
         configureFlexLayout(questionLayout);
         configureFlexLayout(answerLayout);
 
@@ -101,7 +99,8 @@ public class QuizView extends VerticalLayout {
 
         startGame();
 
-        add(headerLayout, questionLayout, answerLayout, buttonLayout,
+        FlexLayout playerLayout = new FlexLayout();
+        add(headerLayout, questionLayout, resultDialog,answerLayout, buttonLayout,
                 playerLayout);
     }
 
@@ -118,10 +117,19 @@ public class QuizView extends VerticalLayout {
         scoreDiv.add(scoreSpan);
     }
 
+    private void displayQuestion(QuizQuestion quizQuestion) {
+        answerLayout.setVisible(true);
+        questionDiv.setText("Question " + (gameLogic.getCurrentQuestionIndex() + 1) + ": " + quizQuestion.question().text());
+        updateAnswerButtons(quizQuestion);
+        checkAnswerStatus(quizQuestion);
+        updateScoreDiv(gameLogic.getUserScore());
+        previousButton.setVisible(true);
+        nextQuestionButton.setVisible(true);
+    }
+
     private void startGame(){
 
         gameLogic.updateQuizQuestions(quizService);
-        System.out.println("updating questions.. "+ gameLogic.getQuizQuestions().size());
         gameLogic.setFirstQuestionIndex();
         loadNextQuestion();
 
@@ -129,23 +137,16 @@ public class QuizView extends VerticalLayout {
 
 
     private void loadNextQuestion() {
-        // fetch data from the trivia API
-        boolean gameOver = gameLogic.followingQuestion();
-        QuizQuestion quizQuestion = gameLogic.getCurrentQuestion();
 
-        if (!gameOver) {
-            int currentQuestion = gameLogic.getCurrentQuestionIndex() +1;
+        QuizQuestion quizQuestion = gameLogic.getFollowingQuestion();
 
-            // update the div with the question
-            answerLayout.setVisible(true);
-            questionDiv.setText("Question "+ currentQuestion+": "+ quizQuestion.question().text());
-            updateAnswerButtons(quizQuestion);
-            checkAnswerStatus(quizQuestion);
-            updateScoreDiv(gameLogic.getUserScore());
-
+        if (quizQuestion != null) {
+            displayQuestion(quizQuestion);
         }else {
+
             questionDiv.setText("No following questions");
             answerLayout.setVisible(false);
+            nextQuestionButton.setVisible(false);
         }
     }
 
@@ -153,56 +154,56 @@ public class QuizView extends VerticalLayout {
         QuizQuestion quizQuestion = gameLogic.getPreviousQuestion();
 
         if(quizQuestion != null) {
-            answerLayout.setVisible(true);
-            questionDiv.setText("Question " + gameLogic.getCurrentQuestionIndex() + ": " + quizQuestion.question().text());
-            updateAnswerButtons(quizQuestion);
-            checkAnswerStatus(quizQuestion);
+           displayQuestion(quizQuestion);
         }
         else{
             questionDiv.setText("No previous questions to load!");
             answerLayout.setVisible(false);
+            previousButton.setVisible(false);
         }
 
     }
 
     private void displayResult(int selectedAnswerIndex) {
 
-        // disable possibility to choosing a different answer
         for (int i = 0; i < NUM_ANSWER_OPTIONS; i++) {
             answerButtons[i].setEnabled(false);
             answerButtons[i].addThemeVariants();
         }
 
         if (!gameLogic.getUserAnswers().containsKey(gameLogic.getCurrentQuestionIndex())) {
-            // Store the user's answer for the current question
-            // check answer
             String selectedAnswer = answerButtons[selectedAnswerIndex].getText();
-            questionDiv.setText(gameLogic.getCurrentQuestion().question().text() +" **"+gameLogic.getResult(selectedAnswer));
+            updateResultDialog(gameLogic.getResult(selectedAnswer));
             gameLogic.getUserAnswers().put(gameLogic.getCurrentQuestionIndex(), selectedAnswer);
         }
 
     }
 
+    private void updateResultDialog(String selectedAnswer){
+        resultDialog.removeAll();
+        resultDialog.add(selectedAnswer);
+        resultDialog.open();
+
+    }
+
     private void checkAnswerStatus(QuizQuestion quizQuestion){
         if (gameLogic.getUserAnswers().containsKey(gameLogic.getCurrentQuestionIndex())) {
-            // User has answered this question, disable the answer buttons
+            // Question answered, disable answer buttons
             for (int i = 0; i < NUM_ANSWER_OPTIONS; i++) {
                 answerButtons[i].setEnabled(false);
             }
         } else {
-            // User has not answered this question, enable the answer buttons
             updateAnswerButtons(quizQuestion);
         }
     }
 
     private void updateAnswerButtons(QuizQuestion quizQuestion){
-        // add the answer alternatives to an arraylist, and shuffle it
+        // Shuffle the answers, and add them to the buttons
+
         List<String> answerOptions = new ArrayList<>();
         answerOptions.add(quizQuestion.correctAnswer());
         answerOptions.addAll(quizQuestion.incorrectAnswers());
         Collections.shuffle(answerOptions);
-
-        // add the answer alternatives to the button texts
 
         for (int i = 0; i < NUM_ANSWER_OPTIONS; i++) {
             answerButtons[i].setText(answerOptions.get(i));

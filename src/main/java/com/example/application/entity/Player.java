@@ -31,7 +31,4 @@ public class Player {
         this.id = id;
     }
 
-    public String getScoreAsString(){
-        return ""+getScore();
-    }
 }

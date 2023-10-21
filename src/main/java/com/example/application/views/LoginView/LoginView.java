@@ -21,7 +21,7 @@ public class LoginView extends VerticalLayout {
         H1 header = new H1("Welcome to the Quiz Game!");
         H4 info = new H4("Log in to continue..");
         Anchor loginLink = new Anchor(OAUTH_URL, "Login with Google");
-        // Set router-ignore attribute so that Vaadin router doesn't handle the login request
+
         loginLink.getElement().setAttribute("router-ignore", true);
         add(header, info, loginLink);
         getStyle().set("padding", "200px");

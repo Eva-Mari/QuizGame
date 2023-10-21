@@ -2,6 +2,8 @@ package com.example.application.service;
 
 import com.example.application.entity.QuizQuestion;
 import com.example.application.game.URLhandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +41,7 @@ public class QuizService {
             return response.getBody();
 
         } catch (Exception e) {
-            // Handle exceptions, e.g., network errors, API errors
+
             e.printStackTrace();
             return null;
         }

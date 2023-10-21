@@ -23,21 +23,17 @@ public class PlayerGameForm extends FormLayout {
 
     Button close = new Button("Close");
 
-    private final Button startgameButton = new Button("Start Game");
+    private final Button startGameButton = new Button("Start Game");
 
     Binder<Player> binder = new BeanValidationBinder<>(Player.class);
 
     private Player selectedPlayer;
 
-    private final DropDownMenu dropDownMenu;
-    private final QuizService quizService;
-
 
 
     public PlayerGameForm(QuizService quizService) {
 
-        this.quizService = quizService;
-        this.dropDownMenu = new DropDownMenu(quizService.getUrLhandler());
+        DropDownMenu dropDownMenu = new DropDownMenu(quizService.getUrLhandler());
 
         binder.bindInstanceFields(this);
 
@@ -57,11 +53,11 @@ public class PlayerGameForm extends FormLayout {
 
         close.addClickListener(event -> fireEvent(new PlayerGameForm.CloseEvent(this)));
 
-        startgameButton.addClassName("test-style");
+        startGameButton.addClassName("test-style");
 
-        startgameButton.addClickListener(buttonClickEvent ->
+        startGameButton.addClickListener(buttonClickEvent ->
                 navigateToQuizView());
-        return new HorizontalLayout(close, startgameButton);
+        return new HorizontalLayout(close, startGameButton);
     }
 
     private void navigateToQuizView() {
@@ -70,11 +66,7 @@ public class PlayerGameForm extends FormLayout {
     }
 
     public void setPlayer(Player player) {
-        if(player != null) {
-            System.out.println("game form Set bean is " + player.getName());
-            System.out.println("should not be null");
-        }else{
-            System.out.println("player is null");}
+
         selectedPlayer = player;
         binder.setBean(player);
     }

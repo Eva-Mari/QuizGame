@@ -3,7 +3,10 @@ package com.example.application.game;
 import com.example.application.entity.Player;
 import com.example.application.entity.QuizQuestion;
 import com.example.application.service.QuizService;
+import com.example.application.service.SecurityService;
 import com.example.application.service.UserScoreChangeEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +25,8 @@ public class GameLogic {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    private Player player;
+    private static final Logger logger = LoggerFactory.getLogger(GameLogic.class);
+
 
     public GameLogic(ApplicationEventPublisher eventPublisher) {
         this.quizQuestions = null;
@@ -32,12 +36,7 @@ public class GameLogic {
         this.eventPublisher = eventPublisher;
     }
 
-    public Player getPlayer(){
-        return player;
-    }
-
     public void setPlayer(Player player) {
-        this.player = player;
     }
 
     public int getUserScore(){
@@ -61,39 +60,40 @@ public class GameLogic {
     }
 
     public void updateQuizQuestions(QuizService quizService){
+
+        logger.debug("Updating quiz questions");
         quizQuestions = quizService.getQuizQuestions();
-        System.out.println("All questions: ");
-        for (QuizQuestion question: quizQuestions) {
-            System.out.println(question.question());
-        }
         setFirstQuestionIndex();
         userAnswers.clear();
         userScore = 0;
     }
 
-    public boolean followingQuestion(){
+    public QuizQuestion getFollowingQuestion(){
 
         if (currentQuestionIndex < quizQuestions.size()-1) {
             currentQuestionIndex++;
-            return false;
+            logger.debug("current question index: "+ currentQuestionIndex);
+            return quizQuestions.get(currentQuestionIndex);
         }
-        return true;
-    }
-
-    public QuizQuestion getCurrentQuestion() {
-
-        return quizQuestions.get(currentQuestionIndex);
+        else {
+            currentQuestionIndex++;
+            logger.debug("current question index: " + currentQuestionIndex);
+            return null;
+        }
     }
 
     public QuizQuestion getPreviousQuestion() {
+
         if (currentQuestionIndex > 0) {
             currentQuestionIndex--;
             System.out.println(quizQuestions.get(currentQuestionIndex).question()+"answers: "+
                     quizQuestions.get(currentQuestionIndex).correctAnswer()+" "
                     +quizQuestions.get(currentQuestionIndex).incorrectAnswers());
+            logger.debug("current question index: "+ currentQuestionIndex);
             return quizQuestions.get(currentQuestionIndex);
         } else {
-            System.out.println("No previous question available.");
+            currentQuestionIndex--;
+            logger.debug("current question index: "+ currentQuestionIndex);
             return null;
         }
     }

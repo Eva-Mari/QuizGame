@@ -3,8 +3,9 @@ package com.example.application.service;
 import com.example.application.entity.Player;
 import com.example.application.repository.PlayerRepository;
 import jakarta.validation.Valid;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
+import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ import java.util.List;
 public class PlayerService {
 
     private final PlayerRepository playerRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(PlayerService.class);
 
     public PlayerService(PlayerRepository repository){
         this.playerRepository = repository;
@@ -35,7 +38,7 @@ public class PlayerService {
             playerRepository.save(player);
         }
         else{
-            System.out.println(player+" is null!!");
+            logger.debug("Player is null");
         }
     }
 

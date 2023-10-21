@@ -4,30 +4,25 @@ import com.example.application.game.GameLogic;
 import com.example.application.service.PlayerService;
 import com.example.application.service.QuizService;
 import com.example.application.service.SecurityService;
-import com.example.application.views.GameView.QuizView;
-import com.example.application.views.MainLayout;
-//import com.example.application.views.MainView;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.spring.annotation.SpringComponent;
+import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-@Route(value = "/player")//, layout = MainView.class)
+@Route(value = "/player")
 @PermitAll
+@VaadinSessionScope
 @SpringComponent
 public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
 
     private final PlayerService playerService;
-    private final H1 header = new H1("Players");
 
     private final Button addButton = new Button("Add player");
 
@@ -43,9 +38,7 @@ public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
 
     private final Button logoutButton = new Button("Log out");
 
-    private final SecurityService securityService;
-
-    private QuizService quizService;
+    private final QuizService quizService;
 
 
 
@@ -53,7 +46,6 @@ public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
     public PlayerView(PlayerService playerService, GameLogic gameLogic, SecurityService securityService, QuizService quizService){
 
         this.quizService = quizService;
-        this.securityService = securityService;
         this.playerService = playerService;
         this.gameLogic = gameLogic;
         setSizeFull();
@@ -63,13 +55,13 @@ public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
 
         logoutButton.addClickListener(buttonClickEvent -> securityService.logout());
 
+        H1 header = new H1("Players");
         add(header, getContent(), configureButton());
 
         addButton.addClickListener(buttonClickEvent -> addPlayer());
         updateGrid();
         closeEditor();
 
-        System.out.println(playerForm.binder.getBean());
     }
 
     private HorizontalLayout configureButton(){
@@ -120,7 +112,7 @@ public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
         } else {
             playerForm.setPlayer(player);
             playerForm.setVisible(true);
-            addClassName("editing");
+
         }
     }
 
@@ -134,11 +126,10 @@ public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
 
         if (player == null) {
             closeGameForm();
-            System.out.println("closing gamform, player is null");
+
         } else {
             playerGameForm.setPlayer(player);
             playerGameForm.setVisible(true);
-            System.out.println("displaying game form");
         }
     }
 
@@ -149,11 +140,9 @@ public class PlayerView extends VerticalLayout implements BeforeEnterObserver {
     }
 
     private void savePlayer(PlayerForm.SaveEvent event) {
-        System.out.println("inside save event: "+event.getFormPlayer().getName());
         playerService.savePlayer(event.getFormPlayer());
         updateGrid();
         closeEditor();
-        System.out.println("edited and closed");
     }
 
     private void addPlayer() {
