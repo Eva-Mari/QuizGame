@@ -23,8 +23,8 @@ public class PlayerService {
     public List<Player> getPlayers(){
 
         if(playerRepository.count() == 0){
-            Player player = new Player(1L, "Elsy", 10);
-            Player player1 = new Player(2L, "Pippi", 5);
+            Player player = new Player(1L, "Bobbo", 10);
+            Player player1 = new Player(2L, "Diddi", 5);
             playerRepository.save(player);
             playerRepository.save(player1);
         }
